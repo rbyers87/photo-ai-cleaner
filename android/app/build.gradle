@@ -2,49 +2,68 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.photoaicleaner.app"
-    compileSdk rootProject.ext.compileSdkVersion
+    compileSdkVersion 34   // Use 34 (latest stable as of 2025)
+
     defaultConfig {
         applicationId "com.photoaicleaner.app"
-        // Force minSdkVersion 24 for compatibility with admob
-        minSdkVersion 24
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 23     // Minimum supported Android (Android 6.0)
+        targetSdkVersion 34  // Match compileSdk
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+
         aaptOptions {
-            // Files and dirs to omit from packaged assets
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    // Java 17 settings
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
 }
 
 repositories {
-    flatDir{
+    flatDir {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }
 
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
-    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+
+    // Use explicit versions instead of undefined variables
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
+    implementation "androidx.core:core-splashscreen:1.0.1"
+
     implementation project(':capacitor-android')
-    testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "androidx.test.ext:junit:1.1.5"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
 }
+
 
 apply from: 'capacitor.build.gradle'
 
+// Apply Google Services if json exists
 try {
     def servicesJSON = file('google-services.json')
     if (servicesJSON.text) {
