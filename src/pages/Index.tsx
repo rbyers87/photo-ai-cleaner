@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UploadZone } from "@/components/UploadZone";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { Header } from "@/components/Header";
+import { AdBanner } from "@/components/AdBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trash2, Check, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useAdRemoval } from "@/hooks/useAdRemoval";
+import { useAds } from "@/hooks/useAds";
+import '../types/capacitor';
 
 export interface PhotoItem {
   id: string;
@@ -18,6 +22,18 @@ export interface PhotoItem {
 const Index = () => {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  
+  const { adsRemoved, loading: adLoadingStatus } = useAdRemoval();
+  const { showBanner, hideBanner, trackAction } = useAds(adsRemoved);
+
+  // Show banner when component mounts and ads are not removed
+  useEffect(() => {
+    if (!adsRemoved) {
+      showBanner();
+    } else {
+      hideBanner();
+    }
+  }, [adsRemoved]);
 
   const handlePhotosUploaded = (files: File[]) => {
     const newPhotos: PhotoItem[] = files.map((file) => ({
@@ -75,6 +91,9 @@ const Index = () => {
     setPhotos((prev) => prev.filter((p) => !selectedPhotos.has(p.id)));
     toast.success(`Deleted ${selectedPhotos.size} photos`);
     setSelectedPhotos(new Set());
+    
+    // Track action for interstitial ad
+    trackAction();
   };
 
   const handleKeepSelected = () => {
@@ -93,6 +112,9 @@ const Index = () => {
     );
     toast.success(`Marked ${selectedPhotos.size} photos to keep`);
     setSelectedPhotos(new Set());
+    
+    // Track action for interstitial ad
+    trackAction();
   };
 
   const handleToggleSelectAllInCategory = (category: "delete" | "keep") => {
@@ -215,6 +237,9 @@ const Index = () => {
           </div>
         )}
       </main>
+      
+      {/* Ad Banner at bottom */}
+      <AdBanner show={!adsRemoved && !adLoadingStatus} />
     </div>
   );
 };

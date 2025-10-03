@@ -11,6 +11,9 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 0
+    },
+    AdMob: {
+      // Configure AdMob settings here if needed
     }
   }
 };
