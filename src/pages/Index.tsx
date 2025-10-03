@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAdRemoval } from "@/hooks/useAdRemoval";
 import { useAds } from "@/hooks/useAds";
-import '../types/capacitor';
 
 export interface PhotoItem {
   id: string;

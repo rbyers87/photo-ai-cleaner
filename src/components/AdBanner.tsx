@@ -1,5 +1,3 @@
-import '../types/capacitor';
-
 interface AdBannerProps {
   show: boolean;
 }

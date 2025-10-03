@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { AdMob, BannerAdOptions, BannerAdSize, BannerAdPosition, InterstitialAdPluginEvents, AdMobBannerSize } from '@capacitor-community/admob';
-import '../types/capacitor';
 
 // Test IDs - Replace with your real AdMob IDs in production
 const TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';

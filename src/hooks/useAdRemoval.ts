@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Preferences } from '@capacitor/preferences';
 import { toast } from 'sonner';
-import '../types/capacitor';
 
 const AD_REMOVAL_KEY = 'ad_removal_purchased';
 const AD_REMOVAL_PRODUCT_ID = 'remove_ads'; // Change this to your actual product ID
