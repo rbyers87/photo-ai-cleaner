@@ -95,15 +95,34 @@ const Index = () => {
     setSelectedPhotos(new Set());
   };
 
-  const handleSelectAllInCategory = (category: "delete" | "keep") => {
+  const handleToggleSelectAllInCategory = (category: "delete" | "keep") => {
     const categoryPhotos = photos.filter((p) => p.status === category);
-    const categoryIds = new Set(categoryPhotos.map((p) => p.id));
-    setSelectedPhotos(categoryIds);
-    toast.success(`Selected all ${categoryPhotos.length} photos`);
+    const categoryIds = categoryPhotos.map((p) => p.id);
+    
+    // Check if all photos in this category are selected
+    const allSelected = categoryIds.every((id) => selectedPhotos.has(id));
+    
+    if (allSelected) {
+      // Deselect all in this category
+      const newSelection = new Set(selectedPhotos);
+      categoryIds.forEach((id) => newSelection.delete(id));
+      setSelectedPhotos(newSelection);
+      toast.success(`Deselected all photos`);
+    } else {
+      // Select all in this category
+      const newSelection = new Set([...Array.from(selectedPhotos), ...categoryIds]);
+      setSelectedPhotos(newSelection);
+      toast.success(`Selected all ${categoryPhotos.length} photos`);
+    }
   };
 
   const photosToDelete = photos.filter((p) => p.status === "delete");
   const photosToKeep = photos.filter((p) => p.status === "keep");
+  
+  const allDeletePhotosSelected = photosToDelete.length > 0 && 
+    photosToDelete.every((p) => selectedPhotos.has(p.id));
+  const allKeepPhotosSelected = photosToKeep.length > 0 && 
+    photosToKeep.every((p) => selectedPhotos.has(p.id));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
@@ -155,10 +174,12 @@ const Index = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleSelectAllInCategory("delete")}
+                      onClick={() => handleToggleSelectAllInCategory("delete")}
                     >
                       <CheckSquare className="h-4 w-4 mr-2" />
-                      Select All ({photosToDelete.length})
+                      {allDeletePhotosSelected 
+                        ? "Deselect All" 
+                        : `Select All (${photosToDelete.length})`}
                     </Button>
                   </div>
                 )}
@@ -175,10 +196,12 @@ const Index = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleSelectAllInCategory("keep")}
+                      onClick={() => handleToggleSelectAllInCategory("keep")}
                     >
                       <CheckSquare className="h-4 w-4 mr-2" />
-                      Select All ({photosToKeep.length})
+                      {allKeepPhotosSelected 
+                        ? "Deselect All" 
+                        : `Select All (${photosToKeep.length})`}
                     </Button>
                   </div>
                 )}
