@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, AlertCircle, Copy, UserX } from "lucide-react";
+import { Loader2, AlertCircle, Copy, UserX, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PhotoItem } from "@/pages/Index";
 
@@ -20,6 +20,11 @@ const reasonConfig = {
     label: "Duplicate",
     icon: Copy,
     className: "bg-accent/10 text-accent border-accent/20",
+  },
+  screenshot: {
+    label: "Screenshot",
+    icon: Monitor,
+    className: "bg-primary/10 text-primary border-primary/20",
   },
   unknown: {
     label: "Unknown Person",

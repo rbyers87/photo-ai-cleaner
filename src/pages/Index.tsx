@@ -15,7 +15,7 @@ export interface PhotoItem {
   file: File;
   preview: string;
   status: "analyzing" | "keep" | "delete";
-  reasons: Array<"blurry" | "duplicate" | "unknown">;
+  reasons: Array<"blurry" | "duplicate" | "screenshot" | "unknown">;
 }
 
 const Index = () => {
@@ -51,7 +51,19 @@ const Index = () => {
         setPhotos((prev) =>
           prev.map((p) => {
             if (p.id === photo.id) {
-              // Randomly assign analysis results for demo
+              // Check if file is a screenshot
+              const fileName = p.file.name.toLowerCase();
+              const isScreenshot = fileName.includes('screenshot') || 
+                                   fileName.includes('screen_shot') ||
+                                   fileName.includes('screen shot') ||
+                                   fileName.startsWith('scr_') ||
+                                   /screenshot[_-]?\d+/i.test(fileName);
+              
+              if (isScreenshot) {
+                return { ...p, status: "delete", reasons: ["screenshot"] };
+              }
+              
+              // Randomly assign other analysis results for demo
               const random = Math.random();
               if (random > 0.6) {
                 return { ...p, status: "delete", reasons: ["blurry"] };
