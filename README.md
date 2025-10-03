@@ -79,6 +79,14 @@ Go to your Android project folder:
 cd C:\Users\papd437\Documents\photo-ai-cleaner\android
 "C:\gradle\gradle-8.14.3-all\gradle-8.14.3\bin\gradle.bat" assembleDebug
 
+## To push from local to github
+
+git add .
+git commit -m "add changes"
+git push
+
+
+
 
 Gradle will read local.properties and use the SDK path directly.
 
