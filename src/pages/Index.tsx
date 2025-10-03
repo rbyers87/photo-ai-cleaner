@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAdRemoval } from "@/hooks/useAdRemoval";
 import { useAds } from "@/hooks/useAds";
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 export interface PhotoItem {
   id: string;
@@ -16,6 +17,7 @@ export interface PhotoItem {
   preview: string;
   status: "analyzing" | "keep" | "delete";
   reasons: Array<"blurry" | "duplicate" | "screenshot" | "unknown">;
+  nativeUri?: string; // Native file path for actual deletion
 }
 
 const Index = () => {
@@ -93,14 +95,45 @@ const Index = () => {
     });
   };
 
-  const handleBatchDelete = () => {
+  const handleBatchDelete = async () => {
     if (selectedPhotos.size === 0) {
       toast.error("No photos selected");
       return;
     }
 
+    const photosToDelete = photos.filter((p) => selectedPhotos.has(p.id));
+    let deletedCount = 0;
+    let failedCount = 0;
+
+    // Attempt to delete actual files from device if on native platform
+    if (window.Capacitor?.isNativePlatform()) {
+      for (const photo of photosToDelete) {
+        if (photo.nativeUri) {
+          try {
+            await Filesystem.deleteFile({ path: photo.nativeUri });
+            deletedCount++;
+          } catch (error) {
+            console.error(`Failed to delete ${photo.file.name}:`, error);
+            failedCount++;
+          }
+        }
+      }
+    }
+
+    // Remove from app state
     setPhotos((prev) => prev.filter((p) => !selectedPhotos.has(p.id)));
-    toast.success(`Deleted ${selectedPhotos.size} photos`);
+    
+    if (window.Capacitor?.isNativePlatform()) {
+      if (deletedCount > 0) {
+        toast.success(`Deleted ${deletedCount} photo${deletedCount > 1 ? 's' : ''} from device`);
+      }
+      if (failedCount > 0) {
+        toast.error(`Failed to delete ${failedCount} photo${failedCount > 1 ? 's' : ''}`);
+      }
+    } else {
+      toast.success(`Removed ${selectedPhotos.size} photos from list`);
+    }
+    
     setSelectedPhotos(new Set());
     
     // Track action for interstitial ad
