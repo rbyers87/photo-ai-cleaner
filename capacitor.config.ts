@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.15f530c1fddd446fb693e108790c47ec',
+  appId: 'com.photoaicleaner.app',
   appName: 'photo-ai-cleaner',
   webDir: 'dist',
   server: {
