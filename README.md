@@ -71,3 +71,17 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Build APK with Gradle
+
+Go to your Android project folder:
+
+cd C:\Users\papd437\Documents\photo-ai-cleaner\android
+"C:\gradle\gradle-8.14.3-all\gradle-8.14.3\bin\gradle.bat" assembleDebug
+
+
+Gradle will read local.properties and use the SDK path directly.
+
+Output APK:
+
+android/app/build/outputs/apk/debug/app-debug.apk
