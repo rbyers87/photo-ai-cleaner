@@ -3,7 +3,7 @@ import { UploadZone } from "@/components/UploadZone";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Check } from "lucide-react";
+import { Trash2, Check, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -95,6 +95,13 @@ const Index = () => {
     setSelectedPhotos(new Set());
   };
 
+  const handleSelectAllInCategory = (category: "delete" | "keep") => {
+    const categoryPhotos = photos.filter((p) => p.status === category);
+    const categoryIds = new Set(categoryPhotos.map((p) => p.id));
+    setSelectedPhotos(categoryIds);
+    toast.success(`Selected all ${categoryPhotos.length} photos`);
+  };
+
   const photosToDelete = photos.filter((p) => p.status === "delete");
   const photosToKeep = photos.filter((p) => p.status === "keep");
 
@@ -142,7 +149,19 @@ const Index = () => {
                 )}
               </div>
 
-              <TabsContent value="suggested" className="mt-0">
+              <TabsContent value="suggested" className="mt-0 space-y-4">
+                {photosToDelete.length > 0 && (
+                  <div className="flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSelectAllInCategory("delete")}
+                    >
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      Select All ({photosToDelete.length})
+                    </Button>
+                  </div>
+                )}
                 <PhotoGallery
                   photos={photosToDelete}
                   selectedPhotos={selectedPhotos}
@@ -150,7 +169,19 @@ const Index = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="keep" className="mt-0">
+              <TabsContent value="keep" className="mt-0 space-y-4">
+                {photosToKeep.length > 0 && (
+                  <div className="flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSelectAllInCategory("keep")}
+                    >
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      Select All ({photosToKeep.length})
+                    </Button>
+                  </div>
+                )}
                 <PhotoGallery
                   photos={photosToKeep}
                   selectedPhotos={selectedPhotos}
