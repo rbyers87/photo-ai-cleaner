@@ -14,8 +14,10 @@ const initPurchases = async () => {
     try {
       const module = await import('@capgo/capacitor-purchases');
       CapacitorPurchases = module.CapacitorPurchases;
+      // Don't initialize RevenueCat yet - just import the module
     } catch (error) {
       console.log('RevenueCat not available:', error);
+      // Silently fail - don't crash the app
     }
   }
 };
@@ -40,22 +42,13 @@ export const useAdRemoval = () => {
         return;
       }
 
-      // Then check with store (RevenueCat)
-      if (CapacitorPurchases && window.Capacitor?.isNativePlatform()) {
-        try {
-          const customerInfo = await CapacitorPurchases.getCustomerInfo();
-          const hasPurchased = customerInfo.customerInfo.entitlements.active['ad_free'] !== undefined;
-          
-          if (hasPurchased) {
-            await Preferences.set({ key: AD_REMOVAL_KEY, value: 'true' });
-            setAdsRemoved(true);
-          }
-        } catch (error) {
-          console.log('Purchase check error:', error);
-        }
-      }
+      // Skip RevenueCat check - it's not configured yet
+      // This prevents crashes when RevenueCat isn't properly set up
+      setAdsRemoved(false);
     } catch (error) {
       console.error('Error checking purchase status:', error);
+      // Don't crash - just assume ads are not removed
+      setAdsRemoved(false);
     } finally {
       setLoading(false);
     }

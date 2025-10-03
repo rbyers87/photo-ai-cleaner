@@ -28,6 +28,7 @@ export const useAds = (adsRemoved: boolean) => {
       // Only initialize on native platform
       if (!window.Capacitor?.isNativePlatform()) {
         console.log('Ads skipped (not on device)');
+        setInitialized(false);
         return;
       }
 
@@ -40,6 +41,8 @@ export const useAds = (adsRemoved: boolean) => {
       prepareInterstitial();
     } catch (error) {
       console.error('AdMob initialization error:', error);
+      setInitialized(false);
+      // Don't throw - just log and continue
     }
   };
 
