@@ -72,6 +72,20 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
+
+
+## To push from local to github
+
+* git add .
+* git commit -m "add changes"
+* git push
+
+## After a change on lovable.dev do these steps:
+* git pull to get the changes
+* npm run build to build the app
+* npx cap sync to sync files
+* Rebuild and reinstall the app
+
 ## Build APK with Gradle
 
 Go to your Android project folder:
@@ -84,9 +98,3 @@ Gradle will read local.properties and use the SDK path directly.
 Output APK:
 
 android/app/build/outputs/apk/debug/app-debug.apk
-
-## To push from local to github
-
-* git add .
-* git commit -m "add changes"
-* git push
