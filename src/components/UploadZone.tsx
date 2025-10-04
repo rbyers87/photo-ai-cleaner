@@ -1,10 +1,12 @@
 import { useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, Image as ImageIcon, FolderOpen } from "lucide-react";
+import { Upload, Image as ImageIcon, FolderOpen, FileArchive } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Camera } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
+import JSZip from "jszip";
+import { toast } from "sonner";
 
 interface UploadZoneProps {
   onPhotosUploaded: (files: File[]) => void;
@@ -12,6 +14,7 @@ interface UploadZoneProps {
 
 export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -62,10 +65,59 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
     }
   }, [onPhotosUploaded]);
 
+  const handleZipUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      toast.loading(`Extracting photos from ${file.name}...`);
+
+      try {
+        const zip = new JSZip();
+        const contents = await zip.loadAsync(file);
+        
+        const imageFiles: File[] = [];
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.bmp'];
+
+        for (const [filename, zipEntry] of Object.entries(contents.files)) {
+          if (zipEntry.dir) continue;
+          
+          const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
+          if (imageExtensions.includes(ext)) {
+            const blob = await zipEntry.async('blob');
+            const imageFile = new File([blob], filename.split('/').pop() || filename, {
+              type: `image/${ext.slice(1)}`
+            });
+            imageFiles.push(imageFile);
+          }
+        }
+
+        toast.dismiss();
+        
+        if (imageFiles.length > 0) {
+          onPhotosUploaded(imageFiles);
+          toast.success(`Extracted ${imageFiles.length} photos from zip file`);
+        } else {
+          toast.error('No images found in zip file');
+        }
+      } catch (error) {
+        toast.dismiss();
+        console.error('Error extracting zip:', error);
+        toast.error('Failed to extract zip file');
+      }
+
+      // Reset input
+      e.target.value = '';
+    },
+    [onPhotosUploaded]
+  );
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp", ".heic"],
+      "application/zip": [".zip"],
+      "application/x-zip-compressed": [".zip"],
     },
     multiple: true,
     noClick: true,
@@ -97,8 +149,8 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
             {isDragActive ? "Drop your photos here" : "Upload your photos"}
           </h3>
           <p className="text-muted-foreground max-w-md mx-auto">
-            Drag and drop your images, or select files and folders below. We'll analyze them for
-            blur, duplicates, and unknown faces.
+            Drag and drop images or zip files, or use the buttons below. AI will analyze for
+            blur, duplicates, and screenshots.
           </p>
         </div>
 
@@ -154,6 +206,27 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
               Select Photos
             </Button>
           )}
+          
+          {!Capacitor.isNativePlatform() && (
+            <>
+              <input
+                ref={zipInputRef}
+                type="file"
+                accept=".zip"
+                onChange={handleZipUpload}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => zipInputRef.current?.click()}
+              >
+                <FileArchive className="h-4 w-4 mr-2" />
+                Upload Zip
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2 justify-center text-xs text-muted-foreground">
@@ -162,6 +235,7 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
           <span className="px-3 py-1 rounded-full bg-muted">HEIC</span>
           <span className="px-3 py-1 rounded-full bg-muted">GIF</span>
           <span className="px-3 py-1 rounded-full bg-muted">WEBP</span>
+          <span className="px-3 py-1 rounded-full bg-muted">ZIP</span>
         </div>
       </div>
     </div>
