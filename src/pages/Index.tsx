@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAdRemoval } from "@/hooks/useAdRemoval";
 import { useAds } from "@/hooks/useAds";
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { analyzePhoto, findDuplicates } from "@/utils/imageAnalysis";
 
 export interface PhotoItem {
   id: string;
@@ -36,7 +37,7 @@ const Index = () => {
     }
   }, [adsRemoved]);
 
-  const handlePhotosUploaded = (files: File[]) => {
+  const handlePhotosUploaded = async (files: File[]) => {
     const newPhotos: PhotoItem[] = files.map((file) => ({
       id: crypto.randomUUID(),
       file,
@@ -46,41 +47,65 @@ const Index = () => {
     }));
 
     setPhotos((prev) => [...prev, ...newPhotos]);
+    toast.success(`Analyzing ${files.length} photos with AI...`);
+
+    // Find duplicates first
+    const duplicateMap = await findDuplicates(files);
     
-    // Simulate AI analysis
-    newPhotos.forEach((photo, index) => {
-      setTimeout(() => {
-        setPhotos((prev) =>
-          prev.map((p) => {
-            if (p.id === photo.id) {
-              // Check if file is a screenshot
-              const fileName = p.file.name.toLowerCase();
-              const isScreenshot = fileName.includes('screenshot') || 
-                                   fileName.includes('screen_shot') ||
-                                   fileName.includes('screen shot') ||
-                                   fileName.startsWith('scr_') ||
-                                   /screenshot[_-]?\d+/i.test(fileName);
-              
-              if (isScreenshot) {
-                return { ...p, status: "delete", reasons: ["screenshot"] };
-              }
-              
-              // Randomly assign other analysis results for demo
-              const random = Math.random();
-              if (random > 0.6) {
-                return { ...p, status: "delete", reasons: ["blurry"] };
-              } else if (random > 0.3) {
-                return { ...p, status: "delete", reasons: ["duplicate"] };
-              }
-              return { ...p, status: "keep", reasons: [] };
-            }
-            return p;
-          })
-        );
-      }, 1000 + index * 300);
+    // Analyze each photo with AI
+    const analysisPromises = newPhotos.map(async (photo, index) => {
+      // Add a small delay to avoid overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, index * 500));
+      
+      try {
+        const analysis = await analyzePhoto(photo.file);
+        const reasons: Array<"blurry" | "duplicate" | "screenshot" | "unknown"> = [];
+        
+        // Check if it's a duplicate
+        if (duplicateMap.has(index)) {
+          reasons.push("duplicate");
+        }
+        
+        // Check AI analysis results
+        if (analysis.isScreenshot) {
+          reasons.push("screenshot");
+        }
+        
+        if (analysis.isBlurry && analysis.blurScore > 50) {
+          reasons.push("blurry");
+        }
+        
+        const shouldDelete = reasons.length > 0;
+        
+        return {
+          id: photo.id,
+          status: shouldDelete ? "delete" : "keep",
+          reasons
+        };
+      } catch (error) {
+        console.error(`Failed to analyze ${photo.file.name}:`, error);
+        return {
+          id: photo.id,
+          status: "keep",
+          reasons: []
+        };
+      }
     });
 
-    toast.success(`Analyzing ${files.length} photos...`);
+    // Update photos as analyses complete
+    const results = await Promise.all(analysisPromises);
+    
+    setPhotos((prev) =>
+      prev.map((p) => {
+        const result = results.find((r) => r.id === p.id);
+        if (result) {
+          return { ...p, status: result.status as "analyzing" | "keep" | "delete", reasons: result.reasons };
+        }
+        return p;
+      })
+    );
+
+    toast.success(`Analysis complete! Found ${results.filter(r => r.status === 'delete').length} photos to review.`);
   };
 
   const handlePhotoSelect = (id: string) => {
