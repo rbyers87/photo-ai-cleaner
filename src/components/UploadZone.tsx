@@ -3,6 +3,8 @@ import { useDropzone } from "react-dropzone";
 import { Upload, Image as ImageIcon, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Camera } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 
 interface UploadZoneProps {
   onPhotosUploaded: (files: File[]) => void;
@@ -24,7 +26,7 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
   );
 
   const handleFolderSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
       const imageFiles = files.filter((file) =>
         file.type.startsWith("image/")
@@ -35,6 +37,30 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
     },
     [onPhotosUploaded]
   );
+
+  const handleNativeGalleryPick = useCallback(async () => {
+    try {
+      const images = await Camera.pickImages({
+        quality: 100,
+        limit: 0, // No limit
+      });
+
+      const files = await Promise.all(
+        images.photos.map(async (photo) => {
+          const response = await fetch(photo.webPath);
+          const blob = await response.blob();
+          const fileName = photo.path?.split('/').pop() || `photo_${Date.now()}.jpg`;
+          return new File([blob], fileName, { type: 'image/jpeg' });
+        })
+      );
+
+      if (files.length > 0) {
+        onPhotosUploaded(files);
+      }
+    } catch (error) {
+      console.error('Error picking images:', error);
+    }
+  }, [onPhotosUploaded]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -94,24 +120,40 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
             className="hidden"
           />
           
-          <input
-            ref={folderInputRef}
-            type="file"
-            {...({ webkitdirectory: "", directory: "" } as any)}
-            multiple
-            onChange={handleFolderSelect}
-            className="hidden"
-            accept="image/*"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full sm:w-auto"
-            onClick={() => folderInputRef.current?.click()}
-          >
-            <FolderOpen className="h-4 w-4 mr-2" />
-            Select Folder
-          </Button>
+          {!Capacitor.isNativePlatform() && (
+            <>
+              <input
+                ref={folderInputRef}
+                type="file"
+                {...({ webkitdirectory: "", directory: "" } as any)}
+                multiple
+                onChange={handleFolderSelect}
+                className="hidden"
+                accept="image/*"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => folderInputRef.current?.click()}
+              >
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Select Folder
+              </Button>
+            </>
+          )}
+          
+          {Capacitor.isNativePlatform() && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={handleNativeGalleryPick}
+            >
+              <FolderOpen className="h-4 w-4 mr-2" />
+              Select Photos
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2 justify-center text-xs text-muted-foreground">
