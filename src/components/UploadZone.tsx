@@ -84,7 +84,10 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
           const response = await fetch(photo.webPath);
           const blob = await response.blob();
           const fileName = photo.path?.split('/').pop() || `photo_${Date.now()}.jpg`;
-          return new File([blob], fileName, { type: 'image/jpeg' });
+          const file = new File([blob], fileName, { type: 'image/jpeg' });
+          // Store the native path for deletion later
+          (file as any).nativeUri = photo.path;
+          return file;
         })
       );
 

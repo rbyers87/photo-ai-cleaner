@@ -1,12 +1,15 @@
-import { ArrowLeft, Crown, Sparkles, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Crown, Sparkles, ShieldCheck, Image, Eye, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useAdRemoval } from "@/hooks/useAdRemoval";
+import { useScanPreferences } from "@/hooks/useScanPreferences";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { adsRemoved, purchasing, purchaseAdRemoval, restorePurchases } = useAdRemoval();
+  const { preferences, updatePreferences, loading: preferencesLoading } = useScanPreferences();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
@@ -31,6 +34,71 @@ const Settings = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
+          {/* AI Scan Settings Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Image className="h-5 w-5" />
+                AI Scan Settings
+              </CardTitle>
+              <CardDescription>
+                Control what types of photos the AI will suggest for deletion
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <label className="text-sm font-medium">Blurry Photos</label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Detect and suggest removal of out-of-focus images
+                  </p>
+                </div>
+                <Switch
+                  checked={preferences.scanBlurry}
+                  onCheckedChange={(checked) => updatePreferences({ scanBlurry: checked })}
+                  disabled={preferencesLoading}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Image className="h-4 w-4 text-muted-foreground" />
+                    <label className="text-sm font-medium">Screenshots</label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Detect and suggest removal of screenshot images
+                  </p>
+                </div>
+                <Switch
+                  checked={preferences.scanScreenshots}
+                  onCheckedChange={(checked) => updatePreferences({ scanScreenshots: checked })}
+                  disabled={preferencesLoading}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Copy className="h-4 w-4 text-muted-foreground" />
+                    <label className="text-sm font-medium">Duplicate Photos</label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Detect and suggest removal of similar or duplicate images
+                  </p>
+                </div>
+                <Switch
+                  checked={preferences.scanDuplicates}
+                  onCheckedChange={(checked) => updatePreferences({ scanDuplicates: checked })}
+                  disabled={preferencesLoading}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Ad Removal Card */}
           <Card className="border-2 border-primary/20 shadow-elegant overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-[100%]" />

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAdRemoval } from "@/hooks/useAdRemoval";
 import { useAds } from "@/hooks/useAds";
+import { useScanPreferences } from "@/hooks/useScanPreferences";
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
 import { analyzePhoto, findDuplicates } from "@/utils/imageAnalysis";
@@ -28,6 +29,7 @@ const Index = () => {
   
   const { adsRemoved, loading: adLoadingStatus } = useAdRemoval();
   const { showBanner, hideBanner, trackAction } = useAds(adsRemoved);
+  const { preferences } = useScanPreferences();
 
   // Show banner when component mounts and ads are not removed
   useEffect(() => {
@@ -45,13 +47,14 @@ const Index = () => {
       preview: URL.createObjectURL(file),
       status: "analyzing",
       reasons: [],
+      nativeUri: (file as any).nativeUri, // Store native path if available
     }));
 
     setPhotos((prev) => [...prev, ...newPhotos]);
     toast.success(`Analyzing ${files.length} photos with AI...`);
 
-    // Find duplicates first
-    const duplicateMap = await findDuplicates(files);
+    // Find duplicates first (only if enabled)
+    const duplicateMap = preferences.scanDuplicates ? await findDuplicates(files) : new Map();
     
     // Analyze each photo with AI
     const analysisPromises = newPhotos.map(async (photo, index) => {
@@ -62,17 +65,17 @@ const Index = () => {
         const analysis = await analyzePhoto(photo.file);
         const reasons: Array<"blurry" | "duplicate" | "screenshot" | "unknown"> = [];
         
-        // Check if it's a duplicate
-        if (duplicateMap.has(index)) {
+        // Check if it's a duplicate (only if enabled)
+        if (preferences.scanDuplicates && duplicateMap.has(index)) {
           reasons.push("duplicate");
         }
         
-        // Check AI analysis results
-        if (analysis.isScreenshot) {
+        // Check AI analysis results (only if enabled)
+        if (preferences.scanScreenshots && analysis.isScreenshot) {
           reasons.push("screenshot");
         }
         
-        if (analysis.isBlurry && analysis.blurScore > 50) {
+        if (preferences.scanBlurry && analysis.isBlurry && analysis.blurScore > 50) {
           reasons.push("blurry");
         }
         
