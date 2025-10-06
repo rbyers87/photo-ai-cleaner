@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAdRemoval } from "@/hooks/useAdRemoval";
 import { useAds } from "@/hooks/useAds";
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
 import { analyzePhoto, findDuplicates } from "@/utils/imageAnalysis";
 
 export interface PhotoItem {
@@ -131,7 +132,7 @@ const Index = () => {
     let failedCount = 0;
 
     // Attempt to delete actual files from device if on native platform
-    if (window.Capacitor?.isNativePlatform()) {
+    if (Capacitor.isNativePlatform()) {
       for (const photo of photosToDelete) {
         if (photo.nativeUri) {
           try {
@@ -148,7 +149,7 @@ const Index = () => {
     // Remove from app state
     setPhotos((prev) => prev.filter((p) => !selectedPhotos.has(p.id)));
     
-    if (window.Capacitor?.isNativePlatform()) {
+    if (Capacitor.isNativePlatform()) {
       if (deletedCount > 0) {
         toast.success(`Deleted ${deletedCount} photo${deletedCount > 1 ? 's' : ''} from device`);
       }
