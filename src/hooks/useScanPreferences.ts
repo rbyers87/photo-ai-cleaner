@@ -5,12 +5,14 @@ export interface ScanPreferences {
   scanScreenshots: boolean;
   scanBlurry: boolean;
   scanDuplicates: boolean;
+  scanNoPeople: boolean;
 }
 
 const DEFAULT_PREFERENCES: ScanPreferences = {
   scanScreenshots: true,
   scanBlurry: true,
   scanDuplicates: true,
+  scanNoPeople: false,
 };
 
 const PREFERENCES_KEY = 'scan_preferences';

@@ -5,6 +5,7 @@ export interface AnalysisResult {
   isScreenshot: boolean;
   blurScore: number;
   confidence: number;
+  hasPeople: boolean;
 }
 
 // Convert file to base64 data URL
@@ -64,7 +65,8 @@ export async function analyzePhoto(file: File): Promise<AnalysisResult> {
         isBlurry: false,
         isScreenshot: isLikelyScreenshot,
         blurScore: 0,
-        confidence: isLikelyScreenshot ? 80 : 50
+        confidence: isLikelyScreenshot ? 80 : 50,
+        hasPeople: false
       };
     }
 
@@ -79,7 +81,8 @@ export async function analyzePhoto(file: File): Promise<AnalysisResult> {
       isBlurry: false,
       isScreenshot: false,
       blurScore: 0,
-      confidence: 0
+      confidence: 0,
+      hasPeople: false
     };
   }
 }

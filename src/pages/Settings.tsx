@@ -1,4 +1,4 @@
-import { ArrowLeft, Crown, Sparkles, ShieldCheck, Image, Eye, Copy } from "lucide-react";
+import { ArrowLeft, Crown, Sparkles, ShieldCheck, Image, Eye, Copy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -93,6 +93,23 @@ const Settings = () => {
                 <Switch
                   checked={preferences.scanDuplicates}
                   onCheckedChange={(checked) => updatePreferences({ scanDuplicates: checked })}
+                  disabled={preferencesLoading}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <label className="text-sm font-medium">Photos Without People</label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Detect and suggest removal of photos without any people in them
+                  </p>
+                </div>
+                <Switch
+                  checked={preferences.scanNoPeople}
+                  onCheckedChange={(checked) => updatePreferences({ scanNoPeople: checked })}
                   disabled={preferencesLoading}
                 />
               </div>

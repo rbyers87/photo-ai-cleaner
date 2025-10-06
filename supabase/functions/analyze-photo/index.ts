@@ -38,14 +38,14 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert photo analyzer. Analyze images and determine if they are blurry or screenshots. Respond with a JSON object containing: {"isBlurry": boolean, "isScreenshot": boolean, "blurScore": number (0-100, where 100 is very blurry), "confidence": number (0-100)}. A screenshot is an image captured from a screen, typically showing UI elements, apps, or desktop content.'
+            content: 'You are an expert photo analyzer. Analyze images and determine if they are blurry, screenshots, and whether they contain people. Respond with a JSON object containing: {"isBlurry": boolean, "isScreenshot": boolean, "blurScore": number (0-100, where 100 is very blurry), "confidence": number (0-100), "hasPeople": boolean}. A screenshot is an image captured from a screen, typically showing UI elements, apps, or desktop content. hasPeople should be true if there are any humans/people visible in the photo.'
           },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: 'Analyze this image. Is it blurry? Is it a screenshot? Return only JSON.'
+                text: 'Analyze this image. Is it blurry? Is it a screenshot? Does it contain any people/humans? Return only JSON.'
               },
               {
                 type: 'image_url',
@@ -93,7 +93,8 @@ serve(async (req) => {
         isBlurry: lowerResponse.includes('blurry') || lowerResponse.includes('blur'),
         isScreenshot: lowerResponse.includes('screenshot'),
         blurScore: lowerResponse.includes('blurry') ? 70 : 20,
-        confidence: 60
+        confidence: 60,
+        hasPeople: lowerResponse.includes('people') || lowerResponse.includes('person') || lowerResponse.includes('human')
       };
     }
 

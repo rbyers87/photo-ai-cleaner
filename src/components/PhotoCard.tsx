@@ -26,8 +26,13 @@ const reasonConfig = {
     icon: Monitor,
     className: "bg-primary/10 text-primary border-primary/20",
   },
+  "no-people": {
+    label: "No People",
+    icon: UserX,
+    className: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
+  },
   unknown: {
-    label: "Unknown Person",
+    label: "Unknown",
     icon: UserX,
     className: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20",
   },

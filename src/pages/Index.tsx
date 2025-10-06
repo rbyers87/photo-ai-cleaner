@@ -19,7 +19,7 @@ export interface PhotoItem {
   file: File;
   preview: string;
   status: "analyzing" | "keep" | "delete";
-  reasons: Array<"blurry" | "duplicate" | "screenshot" | "unknown">;
+  reasons: Array<"blurry" | "duplicate" | "screenshot" | "no-people" | "unknown">;
   nativeUri?: string; // Native file path for actual deletion
 }
 
@@ -63,7 +63,7 @@ const Index = () => {
       
       try {
         const analysis = await analyzePhoto(photo.file);
-        const reasons: Array<"blurry" | "duplicate" | "screenshot" | "unknown"> = [];
+        const reasons: Array<"blurry" | "duplicate" | "screenshot" | "no-people" | "unknown"> = [];
         
         // Check if it's a duplicate (only if enabled)
         if (preferences.scanDuplicates && duplicateMap.has(index)) {
@@ -77,6 +77,10 @@ const Index = () => {
         
         if (preferences.scanBlurry && analysis.isBlurry && analysis.blurScore > 50) {
           reasons.push("blurry");
+        }
+
+        if (preferences.scanNoPeople && !analysis.hasPeople) {
+          reasons.push("no-people");
         }
         
         const shouldDelete = reasons.length > 0;
