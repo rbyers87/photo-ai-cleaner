@@ -4,8 +4,9 @@
 export const ADMOB_CONFIG = {
   // Test IDs for development
   BANNER_AD_ID: {
-    ios: 'ca-app-pub-3940256099942544/2934735716',
-    android: 'ca-app-pub-3940256099942544/6300978111',
+    ios: 'ca-app-pub-4584390638970294~5434994466',
+    android: 'ca-app-pub-4584390638970294~5434994466',
+    web:  'ca-app-pub-4584390638970294~5434994466',
   },
   INTERSTITIAL_AD_ID: {
     ios: 'ca-app-pub-3940256099942544/4411468910',
