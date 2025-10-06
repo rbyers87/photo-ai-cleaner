@@ -8,6 +8,13 @@ import { Capacitor } from "@capacitor/core";
 import JSZip from "jszip";
 import { toast } from "sonner";
 
+// Upload limits
+const MAX_ZIP_SIZE_MB = 100;
+const MAX_ZIP_SIZE_BYTES = MAX_ZIP_SIZE_MB * 1024 * 1024;
+const MAX_PHOTO_SIZE_MB = 10;
+const MAX_PHOTO_SIZE_BYTES = MAX_PHOTO_SIZE_MB * 1024 * 1024;
+const MAX_PHOTOS_COUNT = 200;
+
 interface UploadZoneProps {
   onPhotosUploaded: (files: File[]) => void;
 }
@@ -21,6 +28,18 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
       const imageFiles = acceptedFiles.filter((file) =>
         file.type.startsWith("image/")
       );
+      
+      if (imageFiles.length > MAX_PHOTOS_COUNT) {
+        toast.error(`Maximum ${MAX_PHOTOS_COUNT} photos allowed at once`);
+        return;
+      }
+      
+      const oversizedFiles = imageFiles.filter(file => file.size > MAX_PHOTO_SIZE_BYTES);
+      if (oversizedFiles.length > 0) {
+        toast.error(`Some photos exceed ${MAX_PHOTO_SIZE_MB}MB limit`);
+        return;
+      }
+      
       if (imageFiles.length > 0) {
         onPhotosUploaded(imageFiles);
       }
@@ -34,6 +53,18 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
       const imageFiles = files.filter((file) =>
         file.type.startsWith("image/")
       );
+      
+      if (imageFiles.length > MAX_PHOTOS_COUNT) {
+        toast.error(`Maximum ${MAX_PHOTOS_COUNT} photos allowed at once`);
+        return;
+      }
+      
+      const oversizedFiles = imageFiles.filter(file => file.size > MAX_PHOTO_SIZE_BYTES);
+      if (oversizedFiles.length > 0) {
+        toast.error(`Some photos exceed ${MAX_PHOTO_SIZE_MB}MB limit`);
+        return;
+      }
+      
       if (imageFiles.length > 0) {
         onPhotosUploaded(imageFiles);
       }
@@ -45,7 +76,7 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
     try {
       const images = await Camera.pickImages({
         quality: 100,
-        limit: 0, // No limit
+        limit: MAX_PHOTOS_COUNT,
       });
 
       const files = await Promise.all(
@@ -56,6 +87,12 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
           return new File([blob], fileName, { type: 'image/jpeg' });
         })
       );
+
+      const oversizedFiles = files.filter(file => file.size > MAX_PHOTO_SIZE_BYTES);
+      if (oversizedFiles.length > 0) {
+        toast.error(`Some photos exceed ${MAX_PHOTO_SIZE_MB}MB limit`);
+        return;
+      }
 
       if (files.length > 0) {
         onPhotosUploaded(files);
@@ -69,6 +106,12 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+
+      if (file.size > MAX_ZIP_SIZE_BYTES) {
+        toast.error(`Zip file exceeds ${MAX_ZIP_SIZE_MB}MB limit`);
+        e.target.value = '';
+        return;
+      }
 
       toast.loading(`Extracting photos from ${file.name}...`);
 
@@ -94,12 +137,27 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
 
         toast.dismiss();
         
-        if (imageFiles.length > 0) {
-          onPhotosUploaded(imageFiles);
-          toast.success(`Extracted ${imageFiles.length} photos from zip file`);
-        } else {
+        if (imageFiles.length === 0) {
           toast.error('No images found in zip file');
+          e.target.value = '';
+          return;
         }
+        
+        if (imageFiles.length > MAX_PHOTOS_COUNT) {
+          toast.error(`Zip contains ${imageFiles.length} photos. Maximum ${MAX_PHOTOS_COUNT} allowed`);
+          e.target.value = '';
+          return;
+        }
+        
+        const oversizedFiles = imageFiles.filter(file => file.size > MAX_PHOTO_SIZE_BYTES);
+        if (oversizedFiles.length > 0) {
+          toast.error(`Some photos in zip exceed ${MAX_PHOTO_SIZE_MB}MB limit`);
+          e.target.value = '';
+          return;
+        }
+        
+        onPhotosUploaded(imageFiles);
+        toast.success(`Extracted ${imageFiles.length} photos from zip file`);
       } catch (error) {
         toast.dismiss();
         console.error('Error extracting zip:', error);
@@ -152,6 +210,13 @@ export const UploadZone = ({ onPhotosUploaded }: UploadZoneProps) => {
             Drag and drop images or zip files, or use the buttons below. AI will analyze for
             blur, duplicates, and screenshots.
           </p>
+          <div className="flex flex-wrap gap-2 justify-center text-xs text-muted-foreground mt-2">
+            <span>Max {MAX_PHOTOS_COUNT} photos</span>
+            <span>•</span>
+            <span>{MAX_PHOTO_SIZE_MB}MB per photo</span>
+            <span>•</span>
+            <span>{MAX_ZIP_SIZE_MB}MB zip limit</span>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center max-w-md mx-auto">
