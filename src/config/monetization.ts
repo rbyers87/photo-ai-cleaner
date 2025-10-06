@@ -9,8 +9,9 @@ export const ADMOB_CONFIG = {
     web:  'ca-app-pub-4584390638970294~5434994466',
   },
   INTERSTITIAL_AD_ID: {
-    ios: 'ca-app-pub-3940256099942544/4411468910',
-    android: 'ca-app-pub-3940256099942544/1033173712',
+    ios: 'ca-app-pub-4584390638970294/4620714041',
+    android: 'ca-app-pub-4584390638970294/4620714041',
+    web: 'ca-app-pub-4584390638970294/4620714041',
   },
   // Set to true during development, false in production
   USE_TEST_ADS: true,
