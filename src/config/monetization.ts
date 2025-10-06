@@ -14,7 +14,7 @@ export const ADMOB_CONFIG = {
     web: 'ca-app-pub-4584390638970294/4620714041',
   },
   // Set to true during development, false in production
-  USE_TEST_ADS: true,
+  USE_TEST_ADS: false,
 };
 
 export const IAP_CONFIG = {
