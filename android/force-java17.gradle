@@ -1,0 +1,11 @@
+allprojects {
+    tasks.withType(JavaCompile).configureEach {
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    println("? Forcing Java 17 toolchain for all modules.")
+}

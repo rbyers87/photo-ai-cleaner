@@ -86,6 +86,14 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
 * npx cap sync to sync files
 * Rebuild and reinstall the app
 
+working from chatgpt after lovable update:
+cd Documents\photo-ai-cleaner\
+git pull
+cd android
+./gradlew clean
+./gradlew assembleDebug
+
+
 ## Build APK with Gradle
 
 Go to your Android project folder:
