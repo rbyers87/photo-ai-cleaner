@@ -98,8 +98,11 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
 
 Go to your Android project folder:
 
-cd C:\Users\papd437\Documents\photo-ai-cleaner\android
-"C:\gradle\gradle-8.14.3-all\gradle-8.14.3\bin\gradle.bat" assembleDebug
+* cd Documents\photo-ai-cleaner
+* cd android
+* ./gradlew clean
+* ./gradlew assembleDebug
+
 
 Gradle will read local.properties and use the SDK path directly.
 
