@@ -104,8 +104,7 @@ Go to your Android project folder:
 * ./gradlew assembleDebug
 
 
-Gradle will read local.properties and use the SDK path directly.
+## Last issue:
+No people not working properly
 
-Output APK:
-
-android/app/build/outputs/apk/debug/app-debug.apk
+Need ablilty for user to add their own API for ai to use.
