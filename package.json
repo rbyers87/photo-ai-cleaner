@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^5.7.8",
+    "@capacitor/camera": "^7.0.2",
     "@capacitor/cli": "^5.7.8",
     "@capacitor/core": "^5.7.8",
     "@capacitor/filesystem": "^7.1.4",
