@@ -2,16 +2,16 @@
 // Replace these with your actual IDs before releasing to production
 
 export const ADMOB_CONFIG = {
-  // Test IDs for development
+  // Your production ad unit IDs
   BANNER_AD_ID: {
-    ios: 'ca-app-pub-4584390638970294~5434994466',
-    android: 'ca-app-pub-4584390638970294~5434994466',
-    web:  'ca-app-pub-4584390638970294~5434994466',
-  },
-  INTERSTITIAL_AD_ID: {
     ios: 'ca-app-pub-4584390638970294/4620714041',
     android: 'ca-app-pub-4584390638970294/4620714041',
     web: 'ca-app-pub-4584390638970294/4620714041',
+  },
+  INTERSTITIAL_AD_ID: {
+    ios: 'ca-app-pub-4584390638970294/8552112396',
+    android: 'ca-app-pub-4584390638970294/8552112396',
+    web: 'ca-app-pub-4584390638970294/8552112396',
   },
   // Set to true during development, false in production
   USE_TEST_ADS: false,

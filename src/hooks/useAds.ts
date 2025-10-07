@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdMob, BannerAdOptions, BannerAdSize, BannerAdPosition, InterstitialAdPluginEvents, AdMobBannerSize } from '@capacitor-community/admob';
-
-// Test IDs - Replace with your real AdMob IDs in production
-const TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';
-const TEST_INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/1033173712';
+import { ADMOB_CONFIG } from '@/config/monetization';
+import { Capacitor } from '@capacitor/core';
 
 export const useAds = (adsRemoved: boolean) => {
   const [initialized, setInitialized] = useState(false);
@@ -33,8 +31,8 @@ export const useAds = (adsRemoved: boolean) => {
       }
 
       await AdMob.initialize({
-        testingDevices: ['YOUR_TEST_DEVICE_ID'], // Add your test device IDs
-        initializeForTesting: true, // Remove in production
+        testingDevices: [],
+        initializeForTesting: ADMOB_CONFIG.USE_TEST_ADS,
       });
 
       setInitialized(true);
@@ -52,12 +50,13 @@ export const useAds = (adsRemoved: boolean) => {
     }
 
     try {
+      const platform = Capacitor.getPlatform() as 'ios' | 'android' | 'web';
       const options: BannerAdOptions = {
-        adId: TEST_BANNER_ID,
+        adId: ADMOB_CONFIG.BANNER_AD_ID[platform],
         adSize: BannerAdSize.BANNER,
         position: BannerAdPosition.BOTTOM_CENTER,
         margin: 0,
-        isTesting: true, // Set to false in production
+        isTesting: ADMOB_CONFIG.USE_TEST_ADS,
       };
 
       await AdMob.showBanner(options);
@@ -82,9 +81,10 @@ export const useAds = (adsRemoved: boolean) => {
     }
 
     try {
+      const platform = Capacitor.getPlatform() as 'ios' | 'android' | 'web';
       await AdMob.prepareInterstitial({
-        adId: TEST_INTERSTITIAL_ID,
-        isTesting: true, // Set to false in production
+        adId: ADMOB_CONFIG.INTERSTITIAL_AD_ID[platform],
+        isTesting: ADMOB_CONFIG.USE_TEST_ADS,
       });
       setInterstitialReady(true);
 
