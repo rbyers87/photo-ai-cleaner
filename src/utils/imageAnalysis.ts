@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Preferences } from '@capacitor/preferences';
 
 export interface AnalysisResult {
   isBlurry: boolean;
@@ -50,12 +51,19 @@ export async function analyzePhoto(file: File): Promise<AnalysisResult> {
       fileName.startsWith('scr_') ||
       /screenshot[_-]?\d+/i.test(fileName);
 
+    // Get user's API keys if they've configured any
+    const { value: apiKeysValue } = await Preferences.get({ key: 'user_api_keys' });
+    const userApiKeys = apiKeysValue ? JSON.parse(apiKeysValue) : {};
+
     // Resize image to reduce data transfer
     const imageData = await resizeImage(file, 800);
 
     // Call the edge function for AI analysis
     const { data, error } = await supabase.functions.invoke('analyze-photo', {
-      body: { imageData }
+      body: { 
+        imageData,
+        userApiKeys // Send user's API keys if they exist
+      }
     });
 
     if (error) {

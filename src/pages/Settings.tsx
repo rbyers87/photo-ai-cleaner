@@ -1,15 +1,65 @@
-import { ArrowLeft, Crown, Sparkles, ShieldCheck, Image, Eye, Copy, Users } from "lucide-react";
+import { ArrowLeft, Crown, Sparkles, ShieldCheck, Image, Eye, Copy, Users, Key, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useAdRemoval } from "@/hooks/useAdRemoval";
 import { useScanPreferences } from "@/hooks/useScanPreferences";
+import { useApiKeys } from "@/hooks/useApiKeys";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { adsRemoved, purchasing, purchaseAdRemoval, restorePurchases } = useAdRemoval();
   const { preferences, updatePreferences, loading: preferencesLoading } = useScanPreferences();
+  const { apiKeys, loading: apiKeysLoading, updateApiKey, removeApiKey } = useApiKeys();
+  const { toast } = useToast();
+  
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [keyValue, setKeyValue] = useState("");
+
+  const handleSaveKey = async (provider: 'openai' | 'anthropic' | 'gemini') => {
+    try {
+      await updateApiKey(provider, keyValue);
+      setEditingKey(null);
+      setKeyValue("");
+      toast({
+        title: "API Key Saved",
+        description: `Your ${provider} API key has been saved successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save API key. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRemoveKey = async (provider: 'openai' | 'anthropic' | 'gemini') => {
+    try {
+      await removeApiKey(provider);
+      toast({
+        title: "API Key Removed",
+        description: `Your ${provider} API key has been removed.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove API key. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const maskApiKey = (key: string) => {
+    if (!key) return "";
+    if (key.length <= 8) return "••••••••";
+    return `${key.slice(0, 4)}${"•".repeat(key.length - 8)}${key.slice(-4)}`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
@@ -113,6 +163,246 @@ const Settings = () => {
                   disabled={preferencesLoading}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* API Keys Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                AI API Keys
+              </CardTitle>
+              <CardDescription>
+                Use your own API keys for AI analysis (optional)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* OpenAI */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="font-medium">OpenAI</Label>
+                    <p className="text-sm text-muted-foreground">GPT-4, GPT-5, Vision models</p>
+                  </div>
+                  {apiKeys.openai && editingKey !== 'openai' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveKey('openai')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {editingKey === 'openai' ? (
+                  <div className="space-y-2">
+                    <Input
+                      type="password"
+                      placeholder="sk-..."
+                      value={keyValue}
+                      onChange={(e) => setKeyValue(e.target.value)}
+                      className="font-mono text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveKey('openai')}
+                        disabled={!keyValue.trim()}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingKey(null);
+                          setKeyValue("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : apiKeys.openai ? (
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                    <code className="text-sm font-mono">{maskApiKey(apiKeys.openai)}</code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingKey('openai');
+                        setKeyValue(apiKeys.openai || "");
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setEditingKey('openai');
+                      setKeyValue("");
+                    }}
+                    disabled={apiKeysLoading}
+                  >
+                    Add OpenAI Key
+                  </Button>
+                )}
+              </div>
+
+              {/* Anthropic */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="font-medium">Anthropic</Label>
+                    <p className="text-sm text-muted-foreground">Claude models</p>
+                  </div>
+                  {apiKeys.anthropic && editingKey !== 'anthropic' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveKey('anthropic')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {editingKey === 'anthropic' ? (
+                  <div className="space-y-2">
+                    <Input
+                      type="password"
+                      placeholder="sk-ant-..."
+                      value={keyValue}
+                      onChange={(e) => setKeyValue(e.target.value)}
+                      className="font-mono text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveKey('anthropic')}
+                        disabled={!keyValue.trim()}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingKey(null);
+                          setKeyValue("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : apiKeys.anthropic ? (
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                    <code className="text-sm font-mono">{maskApiKey(apiKeys.anthropic)}</code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingKey('anthropic');
+                        setKeyValue(apiKeys.anthropic || "");
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setEditingKey('anthropic');
+                      setKeyValue("");
+                    }}
+                    disabled={apiKeysLoading}
+                  >
+                    Add Anthropic Key
+                  </Button>
+                )}
+              </div>
+
+              {/* Google Gemini */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="font-medium">Google Gemini</Label>
+                    <p className="text-sm text-muted-foreground">Gemini models</p>
+                  </div>
+                  {apiKeys.gemini && editingKey !== 'gemini' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveKey('gemini')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {editingKey === 'gemini' ? (
+                  <div className="space-y-2">
+                    <Input
+                      type="password"
+                      placeholder="AIza..."
+                      value={keyValue}
+                      onChange={(e) => setKeyValue(e.target.value)}
+                      className="font-mono text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveKey('gemini')}
+                        disabled={!keyValue.trim()}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingKey(null);
+                          setKeyValue("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : apiKeys.gemini ? (
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                    <code className="text-sm font-mono">{maskApiKey(apiKeys.gemini)}</code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingKey('gemini');
+                        setKeyValue(apiKeys.gemini || "");
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setEditingKey('gemini');
+                      setKeyValue("");
+                    }}
+                    disabled={apiKeysLoading}
+                  >
+                    Add Gemini Key
+                  </Button>
+                )}
+              </div>
+
+              <p className="text-xs text-muted-foreground pt-2">
+                API keys are stored securely on your device and never sent to our servers.
+              </p>
             </CardContent>
           </Card>
 
