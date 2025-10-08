@@ -21,7 +21,7 @@ const Settings = () => {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [keyValue, setKeyValue] = useState("");
 
-  const handleSaveKey = async (provider: 'openai' | 'anthropic' | 'gemini') => {
+  const handleSaveKey = async (provider: 'openai' | 'anthropic' | 'gemini' | 'deepseek') => {
     try {
       await updateApiKey(provider, keyValue);
       setEditingKey(null);
@@ -39,7 +39,7 @@ const Settings = () => {
     }
   };
 
-  const handleRemoveKey = async (provider: 'openai' | 'anthropic' | 'gemini') => {
+  const handleRemoveKey = async (provider: 'openai' | 'anthropic' | 'gemini' | 'deepseek') => {
     try {
       await removeApiKey(provider);
       toast({
@@ -396,6 +396,80 @@ const Settings = () => {
                     disabled={apiKeysLoading}
                   >
                     Add Gemini Key
+                  </Button>
+                )}
+              </div>
+
+              {/* DeepSeek */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="font-medium">DeepSeek</Label>
+                    <p className="text-sm text-muted-foreground">DeepSeek chat models</p>
+                  </div>
+                  {apiKeys.deepseek && editingKey !== 'deepseek' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveKey('deepseek')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {editingKey === 'deepseek' ? (
+                  <div className="space-y-2">
+                    <Input
+                      type="password"
+                      placeholder="sk-..."
+                      value={keyValue}
+                      onChange={(e) => setKeyValue(e.target.value)}
+                      className="font-mono text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleSaveKey('deepseek')}
+                        disabled={!keyValue.trim()}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingKey(null);
+                          setKeyValue("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : apiKeys.deepseek ? (
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                    <code className="text-sm font-mono">{maskApiKey(apiKeys.deepseek)}</code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingKey('deepseek');
+                        setKeyValue(apiKeys.deepseek || "");
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setEditingKey('deepseek');
+                      setKeyValue("");
+                    }}
+                    disabled={apiKeysLoading}
+                  >
+                    Add DeepSeek Key
                   </Button>
                 )}
               </div>

@@ -23,7 +23,41 @@ serve(async (req) => {
     // Check if user has provided their own API keys
     let response;
     
-    if (userApiKeys?.openai) {
+    if (userApiKeys?.deepseek) {
+      console.log('Using user DeepSeek API key...');
+      response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userApiKeys.deepseek}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert photo analyzer. Analyze images and determine if they are blurry, screenshots, and whether they contain people. Respond with a JSON object containing: {"isBlurry": boolean, "isScreenshot": boolean, "blurScore": number (0-100, where 100 is very blurry), "confidence": number (0-100), "hasPeople": boolean}. A screenshot is an image captured from a screen, typically showing UI elements, apps, or desktop content. hasPeople should be true if there are any humans/people visible in the photo.'
+            },
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Analyze this image. Is it blurry? Is it a screenshot? Does it contain any people/humans? Return only JSON.'
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: imageData
+                  }
+                }
+              ]
+            }
+          ],
+          max_tokens: 300,
+        }),
+      });
+    } else if (userApiKeys?.openai) {
       console.log('Using user OpenAI API key...');
       response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -181,6 +215,7 @@ serve(async (req) => {
     } else if (userApiKeys?.anthropic) {
       aiResponse = data.content?.[0]?.text;
     } else {
+      // OpenAI, DeepSeek, and Lovable AI all use the same format
       aiResponse = data.choices?.[0]?.message?.content;
     }
     

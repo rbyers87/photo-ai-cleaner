@@ -5,6 +5,7 @@ export interface ApiKeys {
   openai?: string;
   anthropic?: string;
   gemini?: string;
+  deepseek?: string;
 }
 
 const API_KEYS_STORAGE_KEY = 'user_api_keys';
