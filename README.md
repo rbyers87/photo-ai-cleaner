@@ -89,6 +89,8 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/c
 ## working from chatgpt after lovable update:
 * cd Documents\photo-ai-cleaner\
 * git pull
+* npx cap sync android
+* npx cap open android (only to open in android studio)
 * cd android
 * ./gradlew clean
 * ./gradlew assembleDebug
