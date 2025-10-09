@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.6.0'
+        classpath 'com.android.tools.build:gradle:8.13.0'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.25'
     }
 }
@@ -16,7 +16,17 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    // Add this to enforce the JVM toolchain for Kotlin
+    afterEvaluate { project ->
+        if (project.plugins.hasPlugin('org.jetbrains.kotlin.android') || project.plugins.hasPlugin('kotlin-android')) {
+            project.kotlin {
+                jvmToolchain(17)
+            }
+        }
+    }
 }
+
 
 // 🔧 Force Java 17 for all modules and Capacitor plugins
 subprojects { subproject ->
@@ -31,6 +41,13 @@ subprojects { subproject ->
                     languageVersion = JavaLanguageVersion.of(17)
                 }
             }
+        }
+    }
+
+    // Add this block to align Kotlin's JVM target
+    project.plugins.withId("org.jetbrains.kotlin.android") {
+        project.kotlin {
+            jvmToolchain(17)
         }
     }
 }

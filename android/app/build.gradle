@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.photoaicleaner.app"
-    compileSdkVersion 34   // Use 34 (latest stable as of 2025)
+    compileSdkVersion 35   // Use 34 (latest stable as of 2025)
 
     defaultConfig {
         applicationId "com.photoaicleaner.app"
         minSdkVersion 23     // Minimum supported Android (Android 6.0)
-        targetSdkVersion 34  // Match compileSdk
+        targetSdkVersion 35  // Match compileSdk
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
