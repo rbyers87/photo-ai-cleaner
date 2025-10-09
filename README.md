@@ -107,4 +107,4 @@ Go to your Android project folder:
 ## Last issue:
 No people not working properly
 
-I need ability to implement the user custom ai api as the ai for this application.  I want a toggle to enable it after entering the api key.  Once enabled, the app needs to use the custom ai api instead of the apps default. 
+I need ability to implement the user custom ai api as the ai for this application. I want a toggle or selector to enable the default app ai or the custom user ai api key. 
